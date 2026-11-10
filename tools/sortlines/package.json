@@ -1,0 +1,25 @@
+{
+  "name": "sortlines",
+  "displayName": "sortlines",
+  "description": "Sort (alpha/natural/case-insensitive/descending), deduplicate, reverse or shuffle the selected lines.",
+  "version": "1.0.0",
+  "publisher": "juninmd",
+  "license": "MIT",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Formatters", "Other"],
+  "main": "./extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      { "command": "sortlines.sort", "title": "sortlines: Ordenar (A→Z)" },
+      { "command": "sortlines.sortInsensitive", "title": "sortlines: Ordenar (ignorar maiúsc.)" },
+      { "command": "sortlines.sortNatural", "title": "sortlines: Ordenar natural (file2 < file10)" },
+      { "command": "sortlines.sortDescending", "title": "sortlines: Ordenar (Z→A)" },
+      { "command": "sortlines.unique", "title": "sortlines: Remover duplicadas" },
+      { "command": "sortlines.reverse", "title": "sortlines: Inverter" },
+      { "command": "sortlines.shuffle", "title": "sortlines: Embaralhar" }
+    ]
+  },
+  "scripts": {   "test": "echo No tests" },
+  "devDependencies": { "@types/bun": "latest" }
+}

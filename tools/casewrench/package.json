@@ -1,0 +1,31 @@
+{
+  "name": "casewrench",
+  "displayName": "casewrench",
+  "description": "Convert the selection between camelCase, snake_case, kebab-case, PascalCase, CONSTANT_CASE, Title Case and more.",
+  "version": "1.0.0",
+  "publisher": "juninmd",
+  "license": "MIT",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Formatters", "Other"],
+  "main": "./extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      { "command": "casewrench.convert", "title": "casewrench: Converter caixa da seleção…" },
+      { "command": "casewrench.to.camel", "title": "casewrench: para camelCase" },
+      { "command": "casewrench.to.pascal", "title": "casewrench: para PascalCase" },
+      { "command": "casewrench.to.snake", "title": "casewrench: para snake_case" },
+      { "command": "casewrench.to.kebab", "title": "casewrench: para kebab-case" },
+      { "command": "casewrench.to.constant", "title": "casewrench: para CONSTANT_CASE" },
+      { "command": "casewrench.to.title", "title": "casewrench: para Title Case" },
+      { "command": "casewrench.to.dot", "title": "casewrench: para dot.case" },
+      { "command": "casewrench.to.sentence", "title": "casewrench: para Sentence case" },
+      { "command": "casewrench.to.lower", "title": "casewrench: para lower words" }
+    ],
+    "keybindings": [
+      { "command": "casewrench.convert", "key": "ctrl+alt+c", "when": "editorHasSelection" }
+    ]
+  },
+  "scripts": { "test": "bun test" },
+  "devDependencies": { "@types/bun": "latest" }
+}

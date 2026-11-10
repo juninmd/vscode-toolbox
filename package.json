@@ -1,0 +1,165 @@
+{
+  "name": "vscode-toolbox",
+  "displayName": "Developer Toolbox",
+  "description": "Swiss Army knife extension for VS Code: sort lines, case conversion, JWT/JSON/CSV peek, .env lens & diff, hash checker, relative time formatting, and retro games.",
+  "version": "1.0.0",
+  "publisher": "juninmd",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Formatters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "sort",
+    "case",
+    "jwt",
+    "json",
+    "csv",
+    "env",
+    "hash",
+    "tools",
+    "toolbox"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "toolbox.sortlines.sort",
+        "title": "Toolbox: Sort Lines (A→Z)"
+      },
+      {
+        "command": "toolbox.sortlines.sortInsensitive",
+        "title": "Toolbox: Sort Lines (Case-Insensitive)"
+      },
+      {
+        "command": "toolbox.sortlines.sortNatural",
+        "title": "Toolbox: Sort Lines (Natural Numbering)"
+      },
+      {
+        "command": "toolbox.sortlines.sortDescending",
+        "title": "Toolbox: Sort Lines (Z→A)"
+      },
+      {
+        "command": "toolbox.sortlines.unique",
+        "title": "Toolbox: Remove Duplicate Lines"
+      },
+      {
+        "command": "toolbox.sortlines.reverse",
+        "title": "Toolbox: Reverse Lines"
+      },
+      {
+        "command": "toolbox.sortlines.shuffle",
+        "title": "Toolbox: Shuffle Lines"
+      },
+      {
+        "command": "toolbox.case.camel",
+        "title": "Toolbox: Convert to camelCase"
+      },
+      {
+        "command": "toolbox.case.pascal",
+        "title": "Toolbox: Convert to PascalCase"
+      },
+      {
+        "command": "toolbox.case.snake",
+        "title": "Toolbox: Convert to snake_case"
+      },
+      {
+        "command": "toolbox.case.kebab",
+        "title": "Toolbox: Convert to kebab-case"
+      },
+      {
+        "command": "toolbox.case.constant",
+        "title": "Toolbox: Convert to CONSTANT_CASE"
+      },
+      {
+        "command": "toolbox.case.title",
+        "title": "Toolbox: Convert to Title Case"
+      },
+      {
+        "command": "toolbox.case.dot",
+        "title": "Toolbox: Convert to dot.case"
+      },
+      {
+        "command": "toolbox.jwt.decode",
+        "title": "Toolbox: Decode Selected JWT Token"
+      },
+      {
+        "command": "toolbox.hash.check",
+        "title": "Toolbox: Calculate Hash (MD5 / SHA256) of Selection"
+      },
+      {
+        "command": "toolbox.color.convert",
+        "title": "Toolbox: Convert Color (HEX <-> RGB)"
+      },
+      {
+        "command": "toolbox.minesweep.play",
+        "title": "Toolbox: Play Minesweeper"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "toolbox.submenu",
+          "group": "1_modification"
+        }
+      ],
+      "submenus": [
+        {
+          "id": "toolbox.submenu",
+          "label": "🛠️ Developer Toolbox"
+        }
+      ],
+      "toolbox.submenu": [
+        {
+          "command": "toolbox.sortlines.sort",
+          "group": "1_sort"
+        },
+        {
+          "command": "toolbox.sortlines.unique",
+          "group": "1_sort"
+        },
+        {
+          "command": "toolbox.case.camel",
+          "group": "2_case"
+        },
+        {
+          "command": "toolbox.case.snake",
+          "group": "2_case"
+        },
+        {
+          "command": "toolbox.case.kebab",
+          "group": "2_case"
+        },
+        {
+          "command": "toolbox.jwt.decode",
+          "group": "3_inspect"
+        },
+        {
+          "command": "toolbox.hash.check",
+          "group": "3_inspect"
+        },
+        {
+          "command": "toolbox.color.convert",
+          "group": "4_color"
+        },
+        {
+          "command": "toolbox.minesweep.play",
+          "group": "5_fun"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "test": "echo No test specified"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0"
+  }
+}

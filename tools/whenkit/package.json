@@ -1,0 +1,30 @@
+{
+  "name": "whenkit",
+  "version": "1.0.0",
+  "description": "Tiny, dependency-free duration parsing/formatting and human relative-time. Fully typed, ESM + CJS.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsdown",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": ["duration", "time", "relative-time", "humanize", "parse", "format", "typescript"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tsdown": "^0.9.0",
+    "typescript": "^5.7.0"
+  }
+}
