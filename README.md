@@ -1,5 +1,9 @@
 # Developer Toolbox
 
+<p align="center">
+  <img src="docs/readme/hero.png" alt="Banner ilustrativo do Developer Toolbox (mockup com dados fictícios)" width="100%">
+</p>
+
 Kit de micro-ferramentas para VS Code: ordenar e deduplicar linhas, converter casing, decodificar JWT, calcular hashes, converter cores e até um campo minado — pelo menu de contexto ou pela paleta de comandos, sem sair do editor.
 
 O repositório reúne 14 ferramentas. A extensão unificada (`package.json` + `src/extension.js`) integra **6 delas como 18 comandos**; as outras 8 vivem em `tools/` como CLI, biblioteca, extensão ou serviço, com README e testes próprios.
@@ -132,6 +136,18 @@ vscode-toolbox/
 A extensão é JavaScript puro, ativada em `onStartupFinished`. Os comandos de linha e de casing leem a seleção do editor ativo e a substituem por `editor.edit`, percorrendo cada seleção (o que atende múltiplos cursores). O hash usa a seleção apenas como entrada e copia o digest; a cor substitui o HEX por `rgb()`; o JWT abre um documento novo com o resultado; o campo minado cria um `WebviewPanel` e carrega o HTML de `tools/minesweep`.
 
 O `package.json` da raiz é o único manifesto que o VS Code lê. Os `package.json` dentro de `tools/` pertencem às versões originais e não são instalados pela extensão unificada.
+
+## Imagens
+
+> [!NOTE]
+> **Mockups ilustrativos.** As telas abaixo foram geradas em HTML com dados fictícios (Playwright) e não são capturas de uma instalação real.
+
+<p align="center">
+  <img src="docs/readme/palette.png" alt="Command palette — mockup ilustrativo com dados fictícios" width="100%">
+  <br>
+  <sub>Command palette — dados fictícios.</sub>
+</p>
+
 
 ## Limitações
 
