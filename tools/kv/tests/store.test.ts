@@ -1,4 +1,7 @@
 import { test, expect } from "bun:test";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { KVStore } from "../src/store";
 
 test("set/get roundtrip preserves JSON value", async () => {
@@ -44,4 +47,28 @@ test("list skips expired and reports bytes", async () => {
   expect(keys.length).toBe(1);
   expect(keys[0].key).toBe("live");
   expect(keys[0].bytes).toBeGreaterThan(0);
+});
+
+test("incr keeps the TTL of an expiring counter", async () => {
+  const s = new KVStore(false);
+  await s.set("rate", 1, 1);
+  await s.incr("rate");
+  expect(s.get("rate", Date.now() + 2000)).toBeUndefined();
+});
+
+test("a write right after construction neither loses nor overwrites persisted data", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "kv-"));
+  writeFileSync(join(dir, "kv.json"), JSON.stringify({ old: { value: 0, updatedAt: 1, expiresAt: null } }));
+  const proc = Bun.spawn(
+    [
+      process.execPath,
+      "-e",
+      `import { KVStore } from "${import.meta.dir}/../src/store";
+       const s = new KVStore(); await s.set("early", 1);
+       await Bun.sleep(50); console.log(JSON.stringify([s.get("early"), s.get("old")]));`,
+    ],
+    { env: { ...process.env, DATA_DIR: dir }, stdout: "pipe" },
+  );
+  expect((await new Response(proc.stdout).text()).trim()).toBe("[1,0]");
+  rmSync(dir, { recursive: true, force: true });
 });

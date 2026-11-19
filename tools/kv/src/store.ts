@@ -11,11 +11,14 @@ const FILE = `${DATA_DIR}/kv.json`;
 
 export class KVStore {
   private map = new Map<string, Entry>();
+  // Resolves once the on-disk snapshot is merged in; writes wait on it so an
+  // early set() is not clobbered by the late load.
+  private ready: Promise<void> = Promise.resolve();
 
   constructor(private persist = true) {
     if (this.persist) {
       mkdirSync(DATA_DIR, { recursive: true });
-      this.load();
+      this.ready = this.load();
     }
   }
 
@@ -45,29 +48,33 @@ export class KVStore {
   }
 
   async set(key: string, value: unknown, ttlSec?: number): Promise<Entry> {
-    const entry: Entry = {
-      value,
-      updatedAt: Date.now(),
-      expiresAt: ttlSec && ttlSec > 0 ? Date.now() + ttlSec * 1000 : null,
-    };
+    await this.ready;
+    return this.put(key, value, ttlSec && ttlSec > 0 ? Date.now() + ttlSec * 1000 : null);
+  }
+
+  private async put(key: string, value: unknown, expiresAt: number | null): Promise<Entry> {
+    const entry: Entry = { value, updatedAt: Date.now(), expiresAt };
     this.map.set(key, entry);
     await this.flush();
     return entry;
   }
 
   async del(key: string): Promise<boolean> {
+    await this.ready;
     const ok = this.map.delete(key);
     if (ok) await this.flush();
     return ok;
   }
 
   // Atomically adds `by` to a numeric value (missing/expired = 0). Throws if the
-  // existing value isn't a number.
+  // existing value isn't a number. Keeps the entry's TTL.
   async incr(key: string, by = 1, now = Date.now()): Promise<number> {
-    const cur = this.live(key, now)?.value ?? 0;
+    await this.ready;
+    const existing = this.live(key, now);
+    const cur = existing?.value ?? 0;
     if (typeof cur !== "number") throw new Error("value is not a number");
     const next = cur + by;
-    await this.set(key, next);
+    await this.put(key, next, existing?.expiresAt ?? null);
     return next;
   }
 
