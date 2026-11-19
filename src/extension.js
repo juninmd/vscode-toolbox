@@ -2,6 +2,10 @@ const vscode = require('vscode');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const {
+  sortLines, sortLinesInsensitive, sortLinesNatural, sortLinesDescending, uniqueLines, reverseLines, shuffleLines,
+  toCamel, toPascal, toSnake, toKebab, toConstant, toTitle, toDot,
+} = require('./transforms');
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -11,8 +15,11 @@ function activate(context) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
     const document = editor.document;
+    // Empty cursors mean "whole file": queue that edit once, and never next to real selections, or the ranges overlap.
+    const filled = editor.selections.filter(sel => !sel.isEmpty);
+    const selections = filled.length ? filled : [editor.selections[0]];
     editor.edit(editBuilder => {
-      editor.selections.forEach(sel => {
+      selections.forEach(sel => {
         const text = sel.isEmpty ? document.getText() : document.getText(sel);
         const transformed = transformFn(text);
         if (sel.isEmpty) {
@@ -30,20 +37,13 @@ function activate(context) {
 
   // 1. Sortlines
   const sortlines = {
-    sort: () => replaceSelection(text => text.split(/\r?\n/).sort((a,b) => a.localeCompare(b)).join('\n')),
-    sortInsensitive: () => replaceSelection(text => text.split(/\r?\n/).sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase())).join('\n')),
-    sortNatural: () => replaceSelection(text => text.split(/\r?\n/).sort((a,b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).join('\n')),
-    sortDescending: () => replaceSelection(text => text.split(/\r?\n/).sort((a,b) => b.localeCompare(a)).join('\n')),
-    unique: () => replaceSelection(text => Array.from(new Set(text.split(/\r?\n/))).join('\n')),
-    reverse: () => replaceSelection(text => text.split(/\r?\n/).reverse().join('\n')),
-    shuffle: () => replaceSelection(text => {
-      const arr = text.split(/\r?\n/);
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr.join('\n');
-    })
+    sort: () => replaceSelection(sortLines),
+    sortInsensitive: () => replaceSelection(sortLinesInsensitive),
+    sortNatural: () => replaceSelection(sortLinesNatural),
+    sortDescending: () => replaceSelection(sortLinesDescending),
+    unique: () => replaceSelection(uniqueLines),
+    reverse: () => replaceSelection(reverseLines),
+    shuffle: () => replaceSelection((text) => shuffleLines(text))
   };
 
   context.subscriptions.push(
@@ -57,22 +57,14 @@ function activate(context) {
   );
 
   // 2. Casewrench
-  function words(str) {
-    return str.replace(/([a-z])([A-Z])/g, '$1 $2')
-              .replace(/[^a-zA-Z0-9]+/g, ' ')
-              .trim()
-              .split(/\s+/)
-              .filter(Boolean);
-  }
-
   const casewrench = {
-    camel: () => replaceSelection(t => words(t).map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('')),
-    pascal: () => replaceSelection(t => words(t).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('')),
-    snake: () => replaceSelection(t => words(t).map(w => w.toLowerCase()).join('_')),
-    kebab: () => replaceSelection(t => words(t).map(w => w.toLowerCase()).join('-')),
-    constant: () => replaceSelection(t => words(t).map(w => w.toUpperCase()).join('_')),
-    title: () => replaceSelection(t => words(t).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')),
-    dot: () => replaceSelection(t => words(t).map(w => w.toLowerCase()).join('.'))
+    camel: () => replaceSelection(toCamel),
+    pascal: () => replaceSelection(toPascal),
+    snake: () => replaceSelection(toSnake),
+    kebab: () => replaceSelection(toKebab),
+    constant: () => replaceSelection(toConstant),
+    title: () => replaceSelection(toTitle),
+    dot: () => replaceSelection(toDot)
   };
 
   context.subscriptions.push(

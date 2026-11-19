@@ -53,7 +53,7 @@ Os comandos de ordenação e de casing agem na seleção; **sem seleção, eles 
 | `toolbox.case.title` | Toolbox: Convert to Title Case | `User Profile` |
 | `toolbox.case.dot` | Toolbox: Convert to dot.case | `user.profile` |
 
-A conversão separa palavras em qualquer caractere não alfanumérico e na transição de minúscula para maiúscula. `hello_world`, `hello-world` e `hello world` chegam ao mesmo resultado.
+A conversão separa palavras em qualquer caractere que não seja letra ou número (de qualquer idioma: `açãoDoUsuário` vira `ação_do_usuário`) e na transição de minúscula para maiúscula. `hello_world`, `hello-world` e `hello world` chegam ao mesmo resultado.
 
 ### Inspeção e utilidades
 
@@ -155,9 +155,9 @@ O `package.json` da raiz é o único manifesto que o VS Code lê. Os `package.js
 - **Hash só de texto selecionado.** Não há hash de arquivo na extensão; o `tools/hashcheck` faz streaming de arquivos e verifica digests.
 - **Cor em uma direção.** Apesar do título “HEX <-> RGB”, a implementação só reconhece HEX e grava `rgb()`; seleções em `rgb()` ou `hsl()` recebem apenas uma mensagem.
 - **Sem atalhos padrão.** Nenhum `keybindings` é declarado; atribua os seus em Keyboard Shortcuts.
-- **Testes por ferramenta.** O `package.json` da raiz define `test` como `echo No test specified`; as suítes estão em `tools/*/tests` e rodam com `bun test` ou `pytest`, conforme a ferramenta.
+- **Testes por ferramenta.** `npm test` na raiz cobre as transformações de texto da extensão unificada (`src/transforms.js`, com `node --test`); as suítes das demais ferramentas estão em `tools/*/tests` e rodam com `bun test` ou `pytest`, conforme a ferramenta.
 - **Campo minado depende do arquivo local.** O painel lê `tools/minesweep/index.html` do diretório da extensão e mostra um fallback se o arquivo não existir.
-- **Sem publicação automatizada.** Não há workflow de CI neste repositório; o VSIX é gerado manualmente.
+- **Sem publicação automatizada.** O CI (`.github/workflows/ci.yml`) só roda a checagem de sintaxe e `npm test` da raiz; o VSIX é gerado manualmente.
 
 ## Desenvolvimento
 
@@ -168,9 +168,10 @@ npx @vscode/vsce package
 code --install-extension vscode-toolbox-1.0.0.vsix --force
 ```
 
-Testes das ferramentas (cada pasta tem o seu runner):
+Testes da extensão unificada e das ferramentas (cada pasta tem o seu runner):
 
 ```bash
+npm test
 (cd tools/sortlines && bun test)
 (cd tools/casewrench && bun test)
 (cd tools/envdiff && bun test)
