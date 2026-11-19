@@ -157,7 +157,7 @@
     }
   },
   "scripts": {
-    "test": "echo No test specified"
+    "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0"
