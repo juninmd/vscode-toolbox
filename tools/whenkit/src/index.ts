@@ -20,11 +20,13 @@ const ORDER: Array<[Unit, number]> = [
   ["s", UNIT_MS.s],
 ];
 
-const TOKEN = /(-?\d+(?:\.\d+)?)\s*(ms|s|m|h|d|w)/gi;
-const FULL = /^(?:-?\d+(?:\.\d+)?\s*(?:ms|s|m|h|d|w)\s*)+$/i;
+const TOKEN = /(\d+(?:\.\d+)?)\s*(ms|s|m|h|d|w)/gi;
+// One optional leading sign for the whole duration, as formatDuration emits it ("-1h 30m").
+const FULL = /^-?\s*(?:\d+(?:\.\d+)?\s*(?:ms|s|m|h|d|w)\s*)+$/i;
 
 /**
  * Parse a duration string like "1h30m", "2.5h", "90 m", "-1d" into milliseconds.
+ * A leading "-" negates the whole duration ("-1h30m" is -90 minutes).
  * Bare numbers are treated as milliseconds. Throws on unparseable input.
  */
 export function parseDuration(input: string | number): number {
@@ -40,7 +42,7 @@ export function parseDuration(input: string | number): number {
   for (let m = TOKEN.exec(trimmed); m; m = TOKEN.exec(trimmed)) {
     total += Number(m[1]) * UNIT_MS[m[2].toLowerCase() as Unit];
   }
-  return total;
+  return trimmed.startsWith("-") ? -total : total;
 }
 
 export interface FormatOptions {
