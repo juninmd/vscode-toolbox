@@ -9,6 +9,15 @@ test("parseDuration: compound and units", () => {
   expect(parseDuration("-1d")).toBe(-86_400_000);
 });
 
+test("parseDuration: a leading minus negates the whole compound duration", () => {
+  expect(parseDuration("-1h30m")).toBe(-5_400_000);
+  expect(parseDuration("-1h 30m")).toBe(-5_400_000);
+  for (const ms of [-5_400_000, -90_061_000, -1_500]) {
+    expect(parseDuration(formatDuration(ms))).toBe(ms);
+  }
+  expect(() => parseDuration("1h -30m")).toThrow();
+});
+
 test("parseDuration: bare numbers are ms; number passthrough", () => {
   expect(parseDuration("500")).toBe(500);
   expect(parseDuration(1234)).toBe(1234);
