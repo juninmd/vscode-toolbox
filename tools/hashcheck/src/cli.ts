@@ -60,9 +60,10 @@ async function main(argv: string[]): Promise<number> {
     return 2;
   }
 
-  // Positional text = first non-flag arg that isn't an option's value.
-  const consumed = new Set([algoArg, file, check].filter((v): v is string => v !== undefined));
-  const text = argv.find((a, i) => !a.startsWith("-") && !consumed.has(a) && !consumed.has(argv[i - 1]!));
+  // Positional text = first non-flag arg that is not the value right after a value-taking option.
+  // Compare positions, not values: `-a md5 md5` must still hash the text "md5".
+  const VALUE_OPTS = new Set(["-a", "--algo", "-f", "--file", "-c", "--check"]);
+  const text = argv.find((a, i) => !a.startsWith("-") && !VALUE_OPTS.has(argv[i - 1] ?? ""));
 
   let digest: string;
   try {
