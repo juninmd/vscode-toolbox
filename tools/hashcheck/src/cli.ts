@@ -30,12 +30,15 @@ function opt(argv: string[], ...names: string[]): string | undefined {
   return undefined;
 }
 
-function hashFile(path: string, algo: Algo): Promise<string> {
+/** Hashes a file with every algo in one streamed read. */
+function hashFileMany(path: string, algos: readonly Algo[]): Promise<Record<Algo, string>> {
   return new Promise((resolve, reject) => {
-    const h = createHash(algo);
+    const hs = algos.map((a) => [a, createHash(a)] as const);
     createReadStream(path)
-      .on("data", (d) => h.update(d))
-      .on("end", () => resolve(h.digest("hex")))
+      .on("data", (d) => {
+        for (const [, h] of hs) h.update(d);
+      })
+      .on("end", () => resolve(Object.fromEntries(hs.map(([a, h]) => [a, h.digest("hex")])) as Record<Algo, string>))
       .on("error", reject);
   });
 }
@@ -64,38 +67,37 @@ async function main(argv: string[]): Promise<number> {
   const consumed = new Set([algoArg, file, check].filter((v): v is string => v !== undefined));
   const text = argv.find((a, i) => !a.startsWith("-") && !consumed.has(a) && !consumed.has(argv[i - 1]!));
 
-  let digest: string;
+  if (file === undefined && text === undefined) {
+    console.error(C.red("error: give <text> or -f <file>"));
+    return 2;
+  }
+  // One read of the file per run: --all hashes every algo in the same pass, -c only the algo it compares.
+  const algos: readonly Algo[] = all ? ALGOS : [check !== undefined ? (algoFromLength(check) ?? algo) : algo];
+  let digests: Record<Algo, string>;
   try {
-    if (file) digest = await hashFile(file, all ? "sha256" : algo);
-    else if (text !== undefined) digest = hashString(all ? "sha256" : algo, text);
-    else {
-      console.error(C.red("error: give <text> or -f <file>"));
-      return 2;
-    }
+    digests = file
+      ? await hashFileMany(file, algos)
+      : (Object.fromEntries(algos.map((a) => [a, hashString(a, text!)])) as Record<Algo, string>);
   } catch (err) {
     console.error(C.red(`error: ${err instanceof Error ? err.message : err}`));
     return 1;
   }
 
   if (all) {
-    for (const a of ALGOS) {
-      const d = file ? await hashFile(file, a) : hashString(a, text!);
-      console.log(`${a.padEnd(7)} ${d}`);
-    }
+    for (const a of ALGOS) console.log(`${a.padEnd(7)} ${digests[a]}`);
     return 0;
   }
 
+  const [only] = algos as [Algo];
   if (check !== undefined) {
-    const detected = algoFromLength(check);
-    const cmpAlgo = detected ?? algo;
-    const actual = file ? await hashFile(file, cmpAlgo) : hashString(cmpAlgo, text!);
+    const actual = digests[only];
     const ok = verify(actual, check);
-    console.log(`${cmpAlgo}: ${ok ? C.green("MATCH ✓") : C.red("MISMATCH ✗")}`);
+    console.log(`${only}: ${ok ? C.green("MATCH ✓") : C.red("MISMATCH ✗")}`);
     if (!ok) console.log(C.dim(`  expected ${check.trim().toLowerCase()}\n  actual   ${actual}`));
     return ok ? 0 : 1;
   }
 
-  console.log(digest);
+  console.log(digests[only]);
   return 0;
 }
 
