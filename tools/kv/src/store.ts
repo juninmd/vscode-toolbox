@@ -83,7 +83,7 @@ export class KVStore {
     for (const [key] of this.map) {
       const e = this.live(key, now);
       if (!e) continue;
-      out.push({ key, updatedAt: e.updatedAt, expiresAt: e.expiresAt, bytes: JSON.stringify(e.value).length });
+      out.push({ key, updatedAt: e.updatedAt, expiresAt: e.expiresAt, bytes: Buffer.byteLength(JSON.stringify(e.value)) });
     }
     return out.sort((a, b) => a.key.localeCompare(b.key));
   }

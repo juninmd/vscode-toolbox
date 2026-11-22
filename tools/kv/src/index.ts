@@ -34,8 +34,10 @@ app.get("/api/kv/:key{.+}", (c) => {
 });
 
 app.put("/api/kv/:key{.+}", async (c) => {
+  // MAX_VALUE_BYTES is UTF-8 bytes: raw.length counts UTF-16 units ("ã" is 1 unit, 2 bytes).
+  if (Number(c.req.header("content-length")) > MAX_VALUE) return c.json({ error: "value too large" }, 413);
   const raw = await c.req.text();
-  if (raw.length > MAX_VALUE) return c.json({ error: "value too large" }, 413);
+  if (Buffer.byteLength(raw) > MAX_VALUE) return c.json({ error: "value too large" }, 413);
   let value: unknown;
   try {
     value = raw === "" ? null : JSON.parse(raw);

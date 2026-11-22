@@ -25,4 +25,14 @@ test("positional text equal to an option value is still hashed", () => {
   const sha = run("hello", "-a", "sha1");
   expect(sha.out.trim()).toBe("aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"); // sha1("hello")
   expect(run("-c", "hello", "hello").code).toBe(1); // compared, not "give <text>"
+test("-f --all hashes a file with every algo (single read) and matches the text digests", () => {
+  const path = `${require("node:os").tmpdir()}/hashcheck-${process.pid}.txt`;
+  require("node:fs").writeFileSync(path, "abc");
+  const fromFile = run("-f", path, "--all");
+  const fromText = run("abc", "--all");
+  expect(fromFile.code).toBe(0);
+  expect(fromFile.out).toBe(fromText.out);
+  const sha256 = fromText.out.split("\n").find((l) => l.startsWith("sha256"))!.split(/\s+/)[1]!;
+  expect(run("-f", path, "-c", sha256).code).toBe(0);
+  expect(run("-f", path, "-c", "0".repeat(64)).code).toBe(1);
 });
